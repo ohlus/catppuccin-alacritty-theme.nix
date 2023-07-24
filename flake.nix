@@ -1,30 +1,30 @@
 {
-  description = "alacritty/alacritty-theme packaged for Nix consumption";
+  description = "catppuccin/alacritty packaged for Nix consumption";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
-    alacritty-theme = {
-      url = "github:alacritty/alacritty-theme";
+    catppuccin-alacritty = {
+      url = "github:catppuccin/alacritty";
       flake = false;
     };
   };
 
-  outputs = inputs@{ self, flake-parts, alacritty-theme, ... }:
+  outputs = inputs@{ self, flake-parts, catppuccin-alacritty, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [ ];
       flake = {
-        overlays.alacritty-theme = final: prev: {
-          alacritty-theme = self.packages.${prev.system};
+        overlays.catppuccin-alacritty-theme = final: prev: {
+          catppuccin-alacritty-theme = self.packages.${prev.system};
         };
-        overlays.default = self.overlays.alacritty-theme;
+        overlays.default = self.overlays.catppuccin-alacritty-theme;
       };
-      systems = [ "x86_64-linux" "aarch64-darwin" ];
+      systems = [ "x86_64-linux" "aarch64-darwin" "aarch64-linux" ];
       perSystem = { lib, pkgs, ... }:
         let
           isYaml = file: lib.hasSuffix ".yaml" file || lib.hasSuffix ".yml" file;
           withoutYamlExtension = file: lib.removeSuffix ".yml" (lib.removeSuffix ".yaml" file);
-          dirEntries = lib.attrNames (builtins.readDir "${alacritty-theme}/themes");
+          dirEntries = lib.attrNames (builtins.readDir "${catppuccin-alacritty}/");
           themeFiles = lib.filter isYaml dirEntries;
           mkThemePackage = themeFile:
             let
@@ -37,7 +37,7 @@
               dontBuild = true;
               installPhase = ''
                 runHook preInstall
-                cp --reflink=auto ${alacritty-theme}/themes/${themeFile} $out
+                cp --reflink=auto ${catppuccin-alacritty}/${themeFile} $out
                 runHook postInstall
               '';
             });
